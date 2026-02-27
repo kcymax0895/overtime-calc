@@ -1,0 +1,6 @@
+<svg width="192" height="192" viewBox="0 0 192 192" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="192" height="192" rx="40" fill="#4f46e5"/>
+  <circle cx="96" cy="96" r="50" fill="white"/>
+  <path d="M120 70 A 50 50 0 0 0 70 120 A 50 50 0 0 1 120 70 Z" fill="#4f46e5"/>
+  <text x="96" y="140" font-family="sans-serif" font-size="24" font-weight="bold" fill="white" text-anchor="middle">야근</text>
+</svg>

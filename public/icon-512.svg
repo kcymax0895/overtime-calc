@@ -1,0 +1,6 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="512" height="512" rx="100" fill="#4f46e5"/>
+  <circle cx="256" cy="256" r="140" fill="white"/>
+  <path d="M316 176 A 140 140 0 0 0 176 316 A 140 140 0 0 1 316 176 Z" fill="#4f46e5"/>
+  <text x="256" y="380" font-family="sans-serif" font-size="64" font-weight="bold" fill="white" text-anchor="middle">야근계산기</text>
+</svg>
