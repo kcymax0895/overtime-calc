@@ -111,6 +111,8 @@ function App() {
                             result={currentRecord?.result ?? null}
                             agg={agg}
                             wage={wage}
+                            records={records}
+                            selectedDate={selectedDate}
                         />
                     </div>
                 </div>

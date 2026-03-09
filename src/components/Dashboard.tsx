@@ -1,10 +1,12 @@
 import { useState, type ReactNode } from 'react';
 import {
     Moon, CalendarDays, Wallet, TrendingUp,
-    ChevronRight, Sunrise, Sunset, Star, Zap
+    ChevronRight, Sunrise, Sunset, Star, Zap, Download
 } from 'lucide-react';
-import { DayResult } from '../types';
+import { DayResult, DailyRecord } from '../types';
 import { cn, formatMinutes, formatWon } from '../lib/utils';
+import * as XLSX from 'xlsx';
+import { format, parse, isSameMonth } from 'date-fns';
 
 // ─── 야근 수당 계산 헬퍼 ───────────────────────────────────────────────────
 // 야근한 시간 전체에 대해 해당 배율로 계산합니다.
@@ -40,6 +42,8 @@ interface DashboardProps {
     result: DayResult | null;
     agg: AggStats;
     wage: number;
+    records: Record<string, DailyRecord>;
+    selectedDate: Date;
 }
 
 // ─── 탭 ─────────────────────────────────────────────────────────────────────
@@ -109,11 +113,44 @@ function OvertimeRow({
 }
 
 // ─── 메인 컴포넌트 ───────────────────────────────────────────────────────────
-export function Dashboard({ result, agg, wage }: DashboardProps) {
+export function Dashboard({ result, agg, wage, records, selectedDate }: DashboardProps) {
     const [tab, setTab] = useState<TabId>('daily');
 
     const dailyOvertimePay = result && wage > 0 ? calcOvertimePay(result, wage) : 0;
     const dailyOvertimeMins = result?.overtimeMinutes ?? 0;
+
+    const downloadExcel = () => {
+        const monthRecords = Object.values(records).filter(record => {
+            if (!record.result) return false;
+            const recordDate = parse(record.dateStr, 'yyyy-MM-dd', new Date());
+            return isSameMonth(recordDate, selectedDate);
+        }).sort((a, b) => a.dateStr.localeCompare(b.dateStr));
+
+        if (monthRecords.length === 0) {
+            alert('출퇴근 기록이 없습니다.');
+            return;
+        }
+
+        const data = monthRecords.map(r => {
+            const overtimePay = calcOvertimePay(r.result, wage);
+            return {
+                '일자': r.dateStr,
+                '출근시간': r.clockInStr,
+                '퇴근시간': r.clockOutStr,
+                '익일퇴근': r.clockOutNextDay ? 'O' : '',
+                '총 근무시간': (r.result.totalWorkMinutes / 60).toFixed(1),
+                '연장근로(시간)': (r.result.overtimeMinutes / 60).toFixed(1),
+                '야근수당(원)': overtimePay
+            };
+        });
+
+        const ws = XLSX.utils.json_to_sheet(data);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "기록");
+
+        const fileName = `${format(selectedDate, 'yyyy년_M월')}_야근기록.xlsx`;
+        XLSX.writeFile(wb, fileName);
+    };
 
     return (
         <div className="space-y-4">
@@ -299,6 +336,15 @@ export function Dashboard({ result, agg, wage }: DashboardProps) {
                             value={formatMinutes(agg.monthlyOvertimeMins)}
                             accent="rose"
                         />
+                    </div>
+                    <div className="mt-4 flex justify-end">
+                        <button
+                            onClick={downloadExcel}
+                            className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors shadow-sm"
+                        >
+                            <Download className="w-4 h-4" />
+                            엑셀로 내보내기
+                        </button>
                     </div>
                 </div>
             )}
